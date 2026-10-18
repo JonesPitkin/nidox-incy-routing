@@ -107,13 +107,22 @@ def build(offline: bool = False, now: int | None = None) -> dict:
     current_hashes["local_direct_domains"] = sha256("\n".join(LOCAL_DIRECT_DOMAINS) + "\n")
     old_hashes, old_generated_at = previous_generation()
     profile["LastUpdated"] = old_generated_at if old_hashes == current_hashes else str(int(time.time() if now is None else now))
-    profile["DirectSites"] = direct_domains
-    profile["DirectIp"] = LOCAL_IPS + direct_cidrs
+    # Main profile mirrors INCY's "Bypass LAN" policy: only private and
+    # local networks bypass the tunnel.  Keeping external services on the
+    # proxy path avoids mixing direct and proxied sessions for sites that are
+    # sensitive to the transport used during authentication.
+    profile["DirectSites"] = []
+    profile["DirectIp"] = LOCAL_IPS
+    ru_direct_profile = profile | {
+        "Name": "NIDOX · RU direct / proxy fallback",
+        "DirectSites": direct_domains,
+        "DirectIp": LOCAL_IPS + direct_cidrs,
+    }
     manifest = {
         "generatedAt": profile["LastUpdated"],
         "generator": "scripts/build.py",
         "sources": [{"name": name, "url": SOURCES[name], "sha256": current_hashes[name]} for name in SOURCES],
-        "counts": {"directDomains": len(direct_domains), "directCidrs": len(direct_cidrs), "diagnosticSniDomains": len(sni_domains)},
+        "counts": {"ruDirectDomains": len(direct_domains), "ruDirectCidrs": len(direct_cidrs), "diagnosticSniDomains": len(sni_domains)},
         "localDirectDomains": LOCAL_DIRECT_DOMAINS,
         "localDirectDomainsSha256": current_hashes["local_direct_domains"],
         "policy": "SNI allowlist is diagnostic only; it is not added to DirectSites.",
@@ -121,6 +130,9 @@ def build(offline: bool = False, now: int | None = None) -> dict:
     DIST.mkdir(parents=True, exist_ok=True)
     BUILD.mkdir(parents=True, exist_ok=True)
     (DIST / "profile.json").write_text(json.dumps(profile, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (DIST / "ru-direct-profile.json").write_text(
+        json.dumps(ru_direct_profile, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     (DIST / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (BUILD / "sni-allowlist.txt").write_text("\n".join(sni_domains) + "\n", encoding="utf-8")
     return profile
