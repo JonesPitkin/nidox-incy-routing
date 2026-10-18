@@ -1,0 +1,27 @@
+{
+  "generatedAt": "1792303911",
+  "generator": "scripts/build.py",
+  "sources": [
+    {
+      "name": "direct_domains",
+      "url": "https://raw.githubusercontent.com/112fm/OpenSmart-Russia/main/direct-domains.txt",
+      "sha256": "f433a30c85829ebdf41c86bb949865c156762aaa3159d5b1e57338281b935f8e"
+    },
+    {
+      "name": "direct_cidrs",
+      "url": "https://raw.githubusercontent.com/112fm/OpenSmart-Russia/main/direct-cidrs.txt",
+      "sha256": "272a40a626fdcb740178b28f0f144066231c4e921b553c45bee3da7d112d70c4"
+    },
+    {
+      "name": "sni_allowlist",
+      "url": "https://raw.githubusercontent.com/hxehex/russia-mobile-internet-whitelist/main/whitelist.txt",
+      "sha256": "dfa4ffeec6c97a6feb7c594934d0c8b4e170fadff1d781f0de012ee383832eb9"
+    }
+  ],
+  "counts": {
+    "directDomains": 293,
+    "directCidrs": 21,
+    "diagnosticSniDomains": 910
+  },
+  "policy": "SNI allowlist is diagnostic only; it is not added to DirectSites."
+}
