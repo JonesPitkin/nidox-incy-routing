@@ -19,8 +19,8 @@
     }
   ],
   "counts": {
-    "directDomains": 295,
-    "directCidrs": 21,
+    "ruDirectDomains": 295,
+    "ruDirectCidrs": 21,
     "diagnosticSniDomains": 910
   },
   "localDirectDomains": [
