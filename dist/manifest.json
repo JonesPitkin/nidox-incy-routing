@@ -1,5 +1,5 @@
 {
-  "generatedAt": "1792303911",
+  "generatedAt": "1792309072",
   "generator": "scripts/build.py",
   "sources": [
     {
@@ -27,5 +27,6 @@
     "rostics.ru",
     "order.rostics.ru"
   ],
+  "localDirectDomainsSha256": "a3e25181f22e246f38fdf695d96ed81971294d41e6515414ff3b381ae7e09490",
   "policy": "SNI allowlist is diagnostic only; it is not added to DirectSites."
 }
