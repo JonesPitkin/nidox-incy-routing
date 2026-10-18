@@ -1,5 +1,5 @@
 {
-  "Name": "NIDOX · RU direct / proxy fallback",
+  "Name": "NIDOX · Bypass LAN / proxy fallback",
   "GlobalProxy": "true",
   "RemoteDNSType": "DoH",
   "RemoteDNSDomain": "https://cloudflare-dns.com/dns-query",
