@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 import tempfile
 import unittest
@@ -28,7 +29,7 @@ class ParsingTests(unittest.TestCase):
 
 
 class ProfileTests(unittest.TestCase):
-    def test_profile_has_proxy_fallback_and_does_not_use_sni_as_direct(self):
+    def test_profile_has_bypass_lan_policy_and_generates_optional_ru_direct_variant(self):
         with tempfile.TemporaryDirectory() as directory:
             temporary = Path(directory)
             cache = temporary / "cache"
@@ -43,13 +44,18 @@ class ProfileTests(unittest.TestCase):
                 (cache / "sni_allowlist.txt").write_text("allowed-sni.example\n", encoding="utf-8")
                 profile = build.build(offline=True, now=1700000000)
                 unchanged_profile = build.build(offline=True, now=1700000999)
+                ru_direct_profile = json.loads(
+                    (temporary / "dist" / "ru-direct-profile.json").read_text(encoding="utf-8")
+                )
             finally:
                 build.CACHE, build.DIST, build.BUILD = original_cache, original_dist, original_build
         self.assertEqual(profile["GlobalProxy"], "true")
-        self.assertIn("gosuslugi.ru", profile["DirectSites"])
-        self.assertIn("rostics.ru", profile["DirectSites"])
-        self.assertIn("order.rostics.ru", profile["DirectSites"])
-        self.assertNotIn("allowed-sni.example", profile["DirectSites"])
+        self.assertEqual(profile["DirectSites"], [])
+        self.assertIn("192.168.0.0/16", profile["DirectIp"])
         self.assertEqual(profile["LastUpdated"], "1700000000")
         self.assertEqual(unchanged_profile["LastUpdated"], "1700000000")
-        self.assertEqual(profile["Name"], "NIDOX · RU direct / proxy fallback")
+        self.assertEqual(profile["Name"], "NIDOX · Bypass LAN / proxy fallback")
+        self.assertIn("gosuslugi.ru", ru_direct_profile["DirectSites"])
+        self.assertIn("rostics.ru", ru_direct_profile["DirectSites"])
+        self.assertIn("order.rostics.ru", ru_direct_profile["DirectSites"])
+        self.assertNotIn("allowed-sni.example", ru_direct_profile["DirectSites"])
