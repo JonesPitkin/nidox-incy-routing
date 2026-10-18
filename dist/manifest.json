@@ -19,9 +19,13 @@
     }
   ],
   "counts": {
-    "directDomains": 293,
+    "directDomains": 295,
     "directCidrs": 21,
     "diagnosticSniDomains": 910
   },
+  "localDirectDomains": [
+    "rostics.ru",
+    "order.rostics.ru"
+  ],
   "policy": "SNI allowlist is diagnostic only; it is not added to DirectSites."
 }
