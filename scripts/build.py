@@ -29,6 +29,9 @@ LOCAL_IPS = [
     "172.16.0.0/12", "192.168.0.0/16", "224.0.0.0/4", "255.255.255.255",
     "::1/128", "fc00::/7", "fe80::/10", "ff00::/8",
 ]
+# Small, reviewed additions that are not present in the upstream curated feed.
+# Keep this list narrow: every entry intentionally bypasses the proxy.
+LOCAL_DIRECT_DOMAINS = ["rostics.ru", "order.rostics.ru"]
 
 
 def download(name: str, url: str, offline: bool) -> str:
@@ -95,7 +98,7 @@ def previous_generation() -> tuple[dict[str, str], str | None]:
 
 def build(offline: bool = False, now: int | None = None) -> dict:
     raw = {name: download(name, url, offline) for name, url in SOURCES.items()}
-    direct_domains = parse_domains(raw["direct_domains"])
+    direct_domains = sorted(set(parse_domains(raw["direct_domains"])) | set(LOCAL_DIRECT_DOMAINS))
     direct_cidrs = parse_networks(raw["direct_cidrs"])
     sni_domains = parse_domains(raw["sni_allowlist"])
     profile = json.loads(TEMPLATE.read_text(encoding="utf-8"))
@@ -109,6 +112,7 @@ def build(offline: bool = False, now: int | None = None) -> dict:
         "generator": "scripts/build.py",
         "sources": [{"name": name, "url": SOURCES[name], "sha256": current_hashes[name]} for name in SOURCES],
         "counts": {"directDomains": len(direct_domains), "directCidrs": len(direct_cidrs), "diagnosticSniDomains": len(sni_domains)},
+        "localDirectDomains": LOCAL_DIRECT_DOMAINS,
         "policy": "SNI allowlist is diagnostic only; it is not added to DirectSites.",
     }
     DIST.mkdir(parents=True, exist_ok=True)
