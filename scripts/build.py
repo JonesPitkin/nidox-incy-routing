@@ -88,8 +88,9 @@ def previous_generation() -> tuple[dict[str, str], str | None]:
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         hashes = {item["name"]: item["sha256"] for item in manifest["sources"]}
+        hashes["local_direct_domains"] = manifest.get("localDirectDomainsSha256", "")
         generated_at = manifest["generatedAt"]
-        if set(hashes) != set(SOURCES) or not str(generated_at).isdigit():
+        if set(hashes) != set(SOURCES) | {"local_direct_domains"} or not str(generated_at).isdigit():
             raise ValueError("incomplete manifest")
         return hashes, str(generated_at)
     except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError):
@@ -103,6 +104,7 @@ def build(offline: bool = False, now: int | None = None) -> dict:
     sni_domains = parse_domains(raw["sni_allowlist"])
     profile = json.loads(TEMPLATE.read_text(encoding="utf-8"))
     current_hashes = {name: sha256(raw[name]) for name in SOURCES}
+    current_hashes["local_direct_domains"] = sha256("\n".join(LOCAL_DIRECT_DOMAINS) + "\n")
     old_hashes, old_generated_at = previous_generation()
     profile["LastUpdated"] = old_generated_at if old_hashes == current_hashes else str(int(time.time() if now is None else now))
     profile["DirectSites"] = direct_domains
@@ -113,6 +115,7 @@ def build(offline: bool = False, now: int | None = None) -> dict:
         "sources": [{"name": name, "url": SOURCES[name], "sha256": current_hashes[name]} for name in SOURCES],
         "counts": {"directDomains": len(direct_domains), "directCidrs": len(direct_cidrs), "diagnosticSniDomains": len(sni_domains)},
         "localDirectDomains": LOCAL_DIRECT_DOMAINS,
+        "localDirectDomainsSha256": current_hashes["local_direct_domains"],
         "policy": "SNI allowlist is diagnostic only; it is not added to DirectSites.",
     }
     DIST.mkdir(parents=True, exist_ok=True)
