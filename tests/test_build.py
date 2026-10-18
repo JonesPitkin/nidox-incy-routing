@@ -47,6 +47,8 @@ class ProfileTests(unittest.TestCase):
                 build.CACHE, build.DIST, build.BUILD = original_cache, original_dist, original_build
         self.assertEqual(profile["GlobalProxy"], "true")
         self.assertIn("gosuslugi.ru", profile["DirectSites"])
+        self.assertIn("rostics.ru", profile["DirectSites"])
+        self.assertIn("order.rostics.ru", profile["DirectSites"])
         self.assertNotIn("allowed-sni.example", profile["DirectSites"])
         self.assertEqual(profile["LastUpdated"], "1700000000")
         self.assertEqual(unchanged_profile["LastUpdated"], "1700000000")
